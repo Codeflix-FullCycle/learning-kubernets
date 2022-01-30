@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: goserver-service
+spec:
+  selector:
+    app: goserver
+  type: LoadBalancer
+  # type: clusterIP
+  # type: NodePort
+  ports:
+    - name: goserver-service-8080
+      port: 80
+      targetPort: 8080
+      protocol: TCP

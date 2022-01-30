@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "goserver"
+  labels:
+    app: "goserver"
+
+spec:
+  selector:
+    matchLabels:
+      app: "goserver"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "goserver"
+    spec:
+      containers:
+        - name: "goserver"
+          image: jkeven/hello-go:v4
+          envFrom:
+            - configMapRef:
+                name: goserver-env
+
+          volumeMounts: # monta um volume no container em questão
+            - mountPath: "/go/myFamily" # o path em que esse volume irá ser montado
+              name: config
+
+      volumes:
+        - name: config # nome do volume
+          configMap:
+            name: goserver-family # conteudo do volume, mapeado do configMap
+            items:
+              - key: members # key do conteúdo
+                path: "family.txt" # path para salvar conteúdo
