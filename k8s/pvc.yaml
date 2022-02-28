@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: goserver-pvc
+spec:
+  resources:
+    requests:
+      storage: 5Gi
+  # volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce # os pods so poderão acessar os volumes existentes no mesmo NODE
+    # - ReadWriteMany # Os pods poderão acessar volumes de nods diferentes(Fazer controlhe de lockin)
+    # - ReadOnlyMany
+    # - WriteOnlyMany

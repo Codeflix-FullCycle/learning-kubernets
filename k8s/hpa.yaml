@@ -1,0 +1,13 @@
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: goserver-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1 # vesão da api usanda para o objeto
+    kind: Deployment # qual obejeto kubernets estamos referenciando
+    name: goserver # nome dado ao objeto criado
+    # nesse caso, aplicacamos no deployment ao invés de aplicar no pod, pois o deployment cuida de boa parte das configurações
+  minReplicas: 1
+  maxReplicas: 4
+  targetCPUUtilizationPercentage: 10 # base para que o hpa decida entre escalar e desescalar

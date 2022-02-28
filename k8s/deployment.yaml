@@ -17,19 +17,63 @@ spec:
     spec:
       containers:
         - name: "goserver"
-          image: jkeven/hello-go:v4
-          envFrom:
-            - configMapRef:
-                name: goserver-env
+          image: jkeven/hello-go:v7
+
+          resources:
+            requests:
+              cpu: "0.3"
+              memory: 20Mi
+
+            limits:
+              cpu: "0.3"
+              memory: 25Mi
+
+          startupProbe: # verifica se a aplicação está rodando e quando estiver libera o readines e liveness
+            httpGet:
+              path: /healthz
+              port: 8000
+            periodSeconds: 3
+            failureThreshold: 30
+            # initialDelaySeconds: 30
+
+          readinessProbe: # verifica se a app está rodando e libera trafego
+            httpGet:
+              path: /healthz
+              port: 8000
+            periodSeconds: 3
+            failureThreshold: 1
+            # initialDelaySeconds: 10
+
+          livenessProbe: # faz o health ckeck e reinicia o cointainer sempre que necessário
+            httpGet:
+              path: /healthz
+              port: 8000
+            # initialDelaySeconds: 15
+            periodSeconds: 5
+            failureThreshold: 1 # limite de vezes que a validação poderá falhar
+            timeoutSeconds: 1
+            successThreshold: 1 # quantos resposta de sucessos seguidas ele deve considerar até colocar a app como live
+
+          # envFrom:
+          # - configMapRef:
+          #     name: goserver-env
+          # - secretRef:
+          # name: goserver-secret
 
           volumeMounts: # monta um volume no container em questão
-            - mountPath: "/go/myFamily" # o path em que esse volume irá ser montado
-              name: config
+            # - mountPath: "/go/myFamily" # o path em que esse volume irá ser montado
+            # name: config
+            - mountPath: "/go/pvc"
+              name: goserver-volume
 
       volumes:
-        - name: config # nome do volume
-          configMap:
-            name: goserver-family # conteudo do volume, mapeado do configMap
-            items:
-              - key: members # key do conteúdo
-                path: "family.txt" # path para salvar conteúdo
+        # fazer bind do volume solicitado no pvc
+        - name: goserver-volume # nome dado para esse volume
+          persistentVolumeClaim:
+            claimName: goserver-pvc # nome do persistence volume claim solicitado
+        # - name: config # nome do volume
+      #     configMap:
+      #       name: goserver-family # conteudo do volume, mapeado do configMap
+      #       items:
+      #         - key: members # key do conteúdo
+      #           path: "family.txt" # path para salvar conteúdo
